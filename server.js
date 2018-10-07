@@ -1,5 +1,6 @@
 const net = require('net');
 const fs = require('fs');
+const cr = require('crypto');
 const port = 8124;
 
 let sid = 0;
@@ -19,8 +20,8 @@ const server = net.createServer((client) => {
     client.on('data', (data) => {
         streamer.write(data+"\n");
         if (!client.start){
-            if (client.count > console.env.COUNT) {
-                client.end();
+            if (client.count > process.env.COUNT) {
+                client.end('Number of customers exceeded!');
             }
             client.start = true;
             client.count = sid++;
@@ -31,6 +32,11 @@ const server = net.createServer((client) => {
             }
             else if (data === 'FILES'){
                 client.needs = 'files';
+                streamer.write("Server: ACK\n");
+                client.write("ACK");
+            }
+            else if (data === 'REMOTE'){
+                client.needs = 'remote';
                 streamer.write("Server: ACK\n");
                 client.write("ACK");
             }
@@ -56,6 +62,22 @@ const server = net.createServer((client) => {
                     });
                 });
             }
+            else if (client.needs === 'remote'){
+                console.log(data);
+                let command = data.split(' ');
+                if (command[0].toLowerCase() === 'copy'){
+                    client.write(copy(command));
+                }
+                else if (command[0].toLowerCase() === 'encode'){
+                    client.write(encode(write));
+                }
+                else if (command[0].toLowerCase() === 'decode'){
+                    client.write(decode(write));
+                }
+                else{
+                    client.write('Incorrect command');
+                }
+            }
         }
     });
 
@@ -78,3 +100,51 @@ const server = net.createServer((client) => {
 server.listen(port, () => {
     console.log(`Server listening on localhost:${port}`);
 });
+
+
+function copy(command){
+    if (command.length !== 3){
+        return 'Incorrect copy request';
+    }
+    if (fs.existsSync(command[1])){
+        let rs = fs.createReadStream(command[1]);
+        let ws = fs.createWriteStream(command[2]);
+        rs.pipe(ws);
+        return 'Completed!';
+    } 
+    else{
+        return 'Incorrect address of file what being copied';
+    }
+}   
+
+function encode(command){
+    if (command.length !== 4){
+        return 'Incorrect copy request';
+    }
+    if (fs.existsSync(command[1])){
+        let rs = fs.createReadStream(command[1]),
+        ws = fs.createWriteStream(command[2]),
+        crs = cr.createCipher('aes-128-cbc', command[3]);
+        rs.pipe(crs).pipe(ws);
+        return 'Completed!';
+    } 
+    else{
+        return 'Incorrect address of file what being copied';
+    }
+}
+
+function decode(command){
+    if (command.length !== 4){
+        return 'Incorrect copy request';
+    }
+    if (fs.existsSync(command[1])){
+        let rs = fs.createReadStream(command[1]),
+        ws = fs.createWriteStream(command[2]),
+        crs = cr.createCipher('aes-128-cbc', command[3]);
+        rs.pipe(crs).pipe(ws);
+        return 'Completed!';
+    } 
+    else{
+        return 'Incorrect address of file what being copied';
+    }
+}
