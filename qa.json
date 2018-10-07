@@ -1,0 +1,22 @@
+[
+  {
+    "question" : "Are you fine?",
+    "answer" : "Yes"
+  },
+  {
+    "question" : "Sunny?",
+    "answer" : "yes"
+  },
+  {
+    "question" : "Yes?",
+    "answer" : "No"
+  },
+  {
+    "question" : "Privet?",
+    "answer" : "No"
+  },
+  {
+    "question" : "Finish?",
+    "answer" : "Yes"
+  }
+]
