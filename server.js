@@ -64,15 +64,18 @@ const server = net.createServer((client) => {
             }
             else if (client.needs === 'remote'){
                 console.log(data);
+                if (data === 'Request is over'){
+                    client.end();
+                }
                 let command = data.split(' ');
                 if (command[0].toLowerCase() === 'copy'){
                     client.write(copy(command));
                 }
                 else if (command[0].toLowerCase() === 'encode'){
-                    client.write(encode(write));
+                    client.write(encode(command));
                 }
                 else if (command[0].toLowerCase() === 'decode'){
-                    client.write(decode(write));
+                    client.write(decode(command));
                 }
                 else{
                     client.write('Incorrect command');
@@ -119,32 +122,32 @@ function copy(command){
 
 function encode(command){
     if (command.length !== 4){
-        return 'Incorrect copy request';
+        return 'Incorrect encode request';
     }
     if (fs.existsSync(command[1])){
         let rs = fs.createReadStream(command[1]),
         ws = fs.createWriteStream(command[2]),
-        crs = cr.createCipher('aes-128-cbc', command[3]);
+        crs = cr.createCipher('aes192', command[3]);
         rs.pipe(crs).pipe(ws);
         return 'Completed!';
     } 
     else{
-        return 'Incorrect address of file what being copied';
+        return 'Incorrect address of file what being encoded';
     }
 }
 
 function decode(command){
     if (command.length !== 4){
-        return 'Incorrect copy request';
+        return 'Incorrect decode request';
     }
     if (fs.existsSync(command[1])){
         let rs = fs.createReadStream(command[1]),
         ws = fs.createWriteStream(command[2]),
-        crs = cr.createCipher('aes-128-cbc', command[3]);
+        crs = cr.createDecipher('aes192', command[3]);
         rs.pipe(crs).pipe(ws);
         return 'Completed!';
     } 
     else{
-        return 'Incorrect address of file what being copied';
+        return 'Incorrect address of file what being decoded';
     }
 }

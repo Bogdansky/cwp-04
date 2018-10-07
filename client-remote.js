@@ -13,9 +13,9 @@ client.connect(port, function() {
 
 let enumerator = 0;
 const requests = [
-    'copy e:\\file.txt E:\\Учёба\\ПСКП\\fil.txt',
-    'hello'/*'encode e:\\file.txt e:\\encode.txt'*/,
-    'bye'
+    'copy e:\\file.txt E:\\Учёба\\ПСКП\\new\\fil.txt',
+    'encode e:\\file.txt e:\\encode.txt 6a',
+    'decode e:\\encode.txt e:\\decode.txt 6a'
 ];
 
 client.on('data',(data) => {
@@ -24,11 +24,11 @@ client.on('data',(data) => {
         client.destroy();
     }
     else if(data.indexOf('Incorrect') !== -1){
-        client.end('Bye');
+        client.destroy();
     }
     else{
         if (enumerator >= 3) {
-            client.end('Request is over');
+            client.write('Request is over');
         }
         else {
             client.write(requests[enumerator++]);
