@@ -64,9 +64,6 @@ const server = net.createServer((client) => {
             }
             else if (client.needs === 'remote'){
                 console.log(data);
-                if (data === 'Request is over'){
-                    client.end();
-                }
                 let command = data.split(' ');
                 if (command[0].toLowerCase() === 'copy'){
                     client.write(copy(command));
@@ -127,7 +124,7 @@ function encode(command){
     if (fs.existsSync(command[1])){
         let rs = fs.createReadStream(command[1]),
         ws = fs.createWriteStream(command[2]),
-        crs = cr.createCipher('aes192', command[3]);
+        crs = cr.createCipher('rc4-hmac-md5', command[3]);
         rs.pipe(crs).pipe(ws);
         return 'Completed!';
     } 
@@ -143,7 +140,7 @@ function decode(command){
     if (fs.existsSync(command[1])){
         let rs = fs.createReadStream(command[1]),
         ws = fs.createWriteStream(command[2]),
-        crs = cr.createDecipher('aes192', command[3]);
+        crs = cr.createDecipher('rc4-hmac-md5', command[3]);
         rs.pipe(crs).pipe(ws);
         return 'Completed!';
     } 
